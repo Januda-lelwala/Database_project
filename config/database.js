@@ -21,7 +21,8 @@ const sequelize = new Sequelize(
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log('PostgreSQL database connection established successfully.');
+    console.log('MySQL database connection established successfully.');
+    console.log('Connected to KandyPack database');
   } catch (error) {
     console.error('Unable to connect to the database:', error.message);
     process.exit(1);

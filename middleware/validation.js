@@ -140,11 +140,109 @@ const validateBooking = [
   handleValidationErrors
 ];
 
+// Store validation
+const validateStore = [
+  body('name')
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Store name must be between 2 and 100 characters'),
+  body('city')
+    .trim()
+    .notEmpty()
+    .withMessage('City is required'),
+  body('address')
+    .trim()
+    .isLength({ min: 5, max: 255 })
+    .withMessage('Address must be between 5 and 255 characters'),
+  body('contactNo')
+    .matches(/^[0-9]{10}$/)
+    .withMessage('Please provide a valid 10-digit contact number'),
+  body('email')
+    .optional()
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email'),
+  handleValidationErrors
+];
+
+// Truck validation
+const validateTruck = [
+  body('registrationNo')
+    .trim()
+    .notEmpty()
+    .withMessage('Registration number is required'),
+  body('capacity')
+    .isFloat({ min: 0 })
+    .withMessage('Capacity must be a positive number'),
+  body('status')
+    .optional()
+    .isIn(['available', 'in_transit', 'maintenance', 'out_of_service'])
+    .withMessage('Invalid truck status'),
+  body('model')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Model must not exceed 100 characters'),
+  body('year')
+    .optional()
+    .isInt({ min: 1900, max: new Date().getFullYear() + 1 })
+    .withMessage('Invalid year'),
+  handleValidationErrors
+];
+
+// Order validation
+const validateOrder = [
+  body('customerId')
+    .notEmpty()
+    .withMessage('Customer ID is required'),
+  body('storeId')
+    .notEmpty()
+    .withMessage('Store ID is required'),
+  body('deliveryAddress')
+    .trim()
+    .isLength({ min: 5, max: 255 })
+    .withMessage('Delivery address must be between 5 and 255 characters'),
+  body('orderDate')
+    .optional()
+    .isDate()
+    .withMessage('Invalid order date'),
+  body('status')
+    .optional()
+    .isIn(['pending', 'processing', 'in_transit', 'delivered', 'cancelled'])
+    .withMessage('Invalid order status'),
+  handleValidationErrors
+];
+
+// Customer validation
+const validateCustomer = [
+  body('name')
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Name must be between 2 and 100 characters'),
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email'),
+  body('phone')
+    .matches(/^[0-9]{10}$/)
+    .withMessage('Please provide a valid 10-digit phone number'),
+  body('address')
+    .optional()
+    .trim()
+    .isLength({ max: 255 })
+    .withMessage('Address must not exceed 255 characters'),
+  handleValidationErrors
+];
+
 module.exports = {
   validateUserRegistration,
   validateUserLogin,
   validateAdminRegistration,
   validateVehicle,
   validateRoute,
-  validateBooking
+  validateBooking,
+  validateStore,
+  validateTruck,
+  validateOrder,
+  validateCustomer
 };

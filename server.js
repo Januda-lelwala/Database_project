@@ -9,8 +9,13 @@ const db = require('./models');
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
-const routeRoutes = require('./routes/routeRoutes');
-const vehicleRoutes = require('./routes/vehicleRoutes');
+// Customer order management routes
+const customerRoutes = require('./routes/customerRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const productRoutes = require('./routes/productRoutes');
+// Store and truck routes
+const storeRoutes = require('./routes/storeRoutes');
+const truckRoutes = require('./routes/truckRoutes');
 
 // Initialize express app
 const app = express();
@@ -46,8 +51,13 @@ if (process.env.NODE_ENV === 'development') {
 
 // API routes
 app.use('/api/auth', authRoutes);
-app.use('/api/routes', routeRoutes);
-app.use('/api/vehicles', vehicleRoutes);
+// Customer order management routes
+app.use('/api/customers', customerRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/products', productRoutes);
+// Store and truck routes
+app.use('/api/stores', storeRoutes);
+app.use('/api/trucks', truckRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -62,8 +72,16 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.status(200).json({
     status: 'success',
-    message: 'Welcome to Transport Management System API',
+    message: 'Welcome to Customer Order Management System API',
     version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      customers: '/api/customers',
+      orders: '/api/orders',
+      products: '/api/products',
+      stores: '/api/stores',
+      trucks: '/api/trucks'
+    },
     documentation: '/api/docs'
   });
 });
