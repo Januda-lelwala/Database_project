@@ -7,7 +7,7 @@ const dbConfig = config[env];
 const sequelize = new Sequelize(
   dbConfig.database,
   dbConfig.username,
-  dbConfig.password,
+  dbConfig.password || null,
   {
     host: dbConfig.host,
     port: dbConfig.port,

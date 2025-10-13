@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const db = require('../models');
-const { User, Admin } = db;
+const { Customer, Admin, Driver } = db;
 
 // Generate JWT token
 const generateToken = (id, role) => {
@@ -9,41 +9,48 @@ const generateToken = (id, role) => {
   });
 };
 
-// User Registration
+// Customer Registration
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, phone, street, city, state, zipCode, country } = req.body;
+    const { name, user_name, password, phone_no, city, address } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
+    // Check if customer already exists
+    const existingCustomer = await Customer.findOne({ where: { user_name } });
+    if (existingCustomer) {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this email'
+        message: 'Customer already exists with this username'
       });
     }
 
-    // Create new user
-    const user = await User.create({
+    // Generate customer ID
+    const customerCount = await Customer.count();
+    const customer_id = `CUS${String(customerCount + 1).padStart(3, '0')}`;
+
+    // Create new customer
+    const customer = await Customer.create({
+      customer_id,
       name,
-      email,
+      user_name,
       password,
-      phone,
-      street,
+      phone_no,
       city,
-      state,
-      zipCode,
-      country: country || 'India'
+      address
     });
 
     // Generate token
-    const token = generateToken(user.id, 'user');
+    const token = generateToken(customer.customer_id, 'customer');
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message: 'Customer registered successfully',
       data: {
-        user,
+        customer: {
+          customer_id: customer.customer_id,
+          name: customer.name,
+          user_name: customer.user_name,
+          city: customer.city
+        },
         token
       }
     });
@@ -56,30 +63,22 @@ const registerUser = async (req, res) => {
   }
 };
 
-// User Login
+// Customer Login
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { user_name, password } = req.body;
 
-    // Find user by email
-    const user = await User.findOne({ where: { email } });
-    if (!user) {
+    // Find customer by username
+    const customer = await Customer.findOne({ where: { user_name } });
+    if (!customer) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
 
-    // Check if user is active
-    if (!user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Account is deactivated'
-      });
-    }
-
     // Check password
-    const isPasswordValid = await user.comparePassword(password);
+    const isPasswordValid = await customer.comparePassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -88,13 +87,18 @@ const loginUser = async (req, res) => {
     }
 
     // Generate token
-    const token = generateToken(user.id, 'user');
+    const token = generateToken(customer.customer_id, 'customer');
 
     res.status(200).json({
       success: true,
       message: 'Login successful',
       data: {
-        user,
+        customer: {
+          customer_id: customer.customer_id,
+          name: customer.name,
+          user_name: customer.user_name,
+          city: customer.city
+        },
         token
       }
     });
@@ -243,11 +247,131 @@ const getAdminProfile = async (req, res) => {
   }
 };
 
+// Driver Registration
+const registerDriver = async (req, res) => {
+  try {
+    const { name, address, phone_no, email, user_name, password } = req.body;
+
+    // Check if driver already exists by username
+    const existingDriverByUsername = await Driver.findOne({ where: { user_name } });
+    if (existingDriverByUsername) {
+      return res.status(400).json({
+        success: false,
+        message: 'Driver already exists with this username'
+      });
+    }
+
+    // Check if driver already exists by email
+    const existingDriverByEmail = await Driver.findOne({ where: { email } });
+    if (existingDriverByEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Driver already exists with this email'
+      });
+    }
+
+    // Create new driver
+    const driver = await Driver.create({
+      name,
+      address,
+      phone_no,
+      email,
+      user_name,
+      password
+    });
+
+    // Generate token
+    const token = generateToken(driver.id, 'driver');
+
+    res.status(201).json({
+      success: true,
+      message: 'Driver registered successfully',
+      data: {
+        driver: {
+          id: driver.id,
+          name: driver.name,
+          user_name: driver.user_name,
+          email: driver.email,
+          phone_no: driver.phone_no,
+          address: driver.address
+        },
+        token
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error during driver registration',
+      error: error.message
+    });
+  }
+};
+
+// Driver Login
+const loginDriver = async (req, res) => {
+  try {
+    const { user_name, password } = req.body;
+
+    // Find driver by username
+    const driver = await Driver.findOne({ where: { user_name } });
+    if (!driver) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Check password
+    const isPasswordValid = await driver.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Check if driver is active
+    if (!driver.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is deactivated'
+      });
+    }
+
+    // Generate token
+    const token = generateToken(driver.id, 'driver');
+
+    res.status(200).json({
+      success: true,
+      message: 'Driver login successful',
+      data: {
+        driver: {
+          id: driver.id,
+          name: driver.name,
+          user_name: driver.user_name,
+          email: driver.email,
+          phone_no: driver.phone_no,
+          address: driver.address
+        },
+        token
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error during driver login',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   registerAdmin,
   loginAdmin,
   getUserProfile,
-  getAdminProfile
+  getAdminProfile,
+  registerDriver,
+  loginDriver
 };

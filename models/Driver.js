@@ -16,6 +16,14 @@ module.exports = (sequelize) => {
         len: { args: [2, 50], msg: 'Name must be between 2 and 50 characters' }
       }
     },
+    user_name: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      unique: true,
+      validate: {
+        notEmpty: { msg: 'Username is required' }
+      }
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -31,21 +39,18 @@ module.exports = (sequelize) => {
         len: { args: [6], msg: 'Password must be at least 6 characters' }
       }
     },
-    phone: {
+    phone_no: {
       type: DataTypes.STRING(15),
-      allowNull: false,
-      validate: {
-        is: { args: /^[0-9]{10}$/, msg: 'Please enter a valid 10-digit phone number' }
-      }
+      allowNull: false
     },
     licenseNumber: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       unique: true
     },
     licenseExpiry: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: true
     },
     address: {
       type: DataTypes.STRING,
@@ -53,7 +58,7 @@ module.exports = (sequelize) => {
     },
     experience: {
       type: DataTypes.INTEGER, // in years
-      allowNull: false
+      allowNull: true
     },
     rating: {
       type: DataTypes.FLOAT,

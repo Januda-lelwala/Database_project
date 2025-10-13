@@ -20,9 +20,8 @@ const truckRoutes = require('./routes/truckRoutes');
 // Initialize express app
 const app = express();
 
-// Database connection - commented out for now
-// You can uncomment this when you're ready to connect to the database
-// connectDB();
+// Database connection
+connectDB();
 
 // Set security HTTP headers
 app.use(helmet());

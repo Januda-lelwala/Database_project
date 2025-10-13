@@ -13,31 +13,37 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// User registration validation
+// Customer registration validation
 const validateUserRegistration = [
   body('name')
     .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be between 2 and 50 characters'),
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email'),
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Name must be between 2 and 100 characters'),
+  body('user_name')
+    .trim()
+    .isLength({ min: 3, max: 50 })
+    .withMessage('Username must be between 3 and 50 characters'),
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
-  body('phone')
-    .matches(/^[0-9]{10}$/)
-    .withMessage('Please provide a valid 10-digit phone number'),
+  body('phone_no')
+    .optional()
+    .trim(),
+  body('city')
+    .optional()
+    .trim(),
+  body('address')
+    .optional()
+    .trim(),
   handleValidationErrors
 ];
 
-// User login validation
+// Customer login validation
 const validateUserLogin = [
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email'),
+  body('user_name')
+    .trim()
+    .notEmpty()
+    .withMessage('Please provide a username'),
   body('password')
     .notEmpty()
     .withMessage('Password is required'),
@@ -234,6 +240,45 @@ const validateCustomer = [
   handleValidationErrors
 ];
 
+// Driver registration validation
+const validateDriverRegistration = [
+  body('name')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Name must be between 2 and 50 characters'),
+  body('user_name')
+    .trim()
+    .isLength({ min: 3, max: 50 })
+    .withMessage('Username must be between 3 and 50 characters'),
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email'),
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long'),
+  body('phone_no')
+    .trim()
+    .notEmpty()
+    .withMessage('Phone number is required'),
+  body('address')
+    .optional()
+    .trim(),
+  handleValidationErrors
+];
+
+// Driver login validation
+const validateDriverLogin = [
+  body('user_name')
+    .trim()
+    .notEmpty()
+    .withMessage('Please provide a username'),
+  body('password')
+    .notEmpty()
+    .withMessage('Password is required'),
+  handleValidationErrors
+];
+
 module.exports = {
   validateUserRegistration,
   validateUserLogin,
@@ -244,5 +289,7 @@ module.exports = {
   validateStore,
   validateTruck,
   validateOrder,
-  validateCustomer
+  validateCustomer,
+  validateDriverRegistration,
+  validateDriverLogin
 };
