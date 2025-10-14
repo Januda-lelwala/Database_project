@@ -193,10 +193,11 @@ module.exports = (sequelize) => {
       as: 'route'
     });
     
-    Booking.belongsTo(models.Vehicle, {
-      foreignKey: 'vehicleId',
-      as: 'vehicle'
-    });
+    // Vehicle model removed
+    // Booking.belongsTo(models.Vehicle, {
+    //   foreignKey: 'vehicleId',
+    //   as: 'vehicle'
+    // });
   };
 
   return Booking;

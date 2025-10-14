@@ -8,7 +8,9 @@ const {
   getUserProfile,
   getAdminProfile,
   registerDriver,
-  loginDriver
+  loginDriver,
+  registerAssistant,
+  loginAssistant
 } = require('../controllers/authController');
 const { verifyUser, verifyAdmin } = require('../middleware/auth');
 const { 
@@ -16,7 +18,9 @@ const {
   validateUserLogin, 
   validateAdminRegistration,
   validateDriverRegistration,
-  validateDriverLogin
+  validateDriverLogin,
+  validateAssistantRegistration,
+  validateAssistantLogin
 } = require('../middleware/validation');
 
 // User routes
@@ -32,5 +36,9 @@ router.get('/admin/profile', verifyAdmin, getAdminProfile);
 // Driver routes
 router.post('/driver/register', validateDriverRegistration, registerDriver);
 router.post('/driver/login', validateDriverLogin, loginDriver);
+
+// Assistant routes
+router.post('/assistant/register', validateAssistantRegistration, registerAssistant);
+router.post('/assistant/login', validateAssistantLogin, loginAssistant);
 
 module.exports = router;

@@ -124,12 +124,13 @@ module.exports = (sequelize) => {
       as: 'schedules'
     });
     
-    Route.belongsToMany(models.Vehicle, {
-      through: 'vehicle_routes',
-      foreignKey: 'route_id',
-      otherKey: 'vehicle_id',
-      as: 'vehicles'
-    });
+    // Vehicle model removed
+    // Route.belongsToMany(models.Vehicle, {
+    //   through: 'vehicle_routes',
+    //   foreignKey: 'route_id',
+    //   otherKey: 'vehicle_id',
+    //   as: 'vehicles'
+    // });
     
     Route.hasMany(models.Booking, {
       foreignKey: 'routeId',

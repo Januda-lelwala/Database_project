@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const db = require('../models');
-const { Customer, Admin, Driver } = db;
+const { Customer, Admin, Driver, Assistant } = db;
 
 // Generate JWT token
 const generateToken = (id, role) => {
@@ -365,6 +365,124 @@ const loginDriver = async (req, res) => {
   }
 };
 
+// Assistant Registration
+const registerAssistant = async (req, res) => {
+  try {
+    const { name, address, phone_no, email, user_name, password } = req.body;
+
+    // Check if assistant already exists by username
+    const existingAssistantByUsername = await Assistant.findOne({ where: { user_name } });
+    if (existingAssistantByUsername) {
+      return res.status(400).json({
+        success: false,
+        message: 'Assistant already exists with this username'
+      });
+    }
+
+    // Check if assistant already exists by email
+    const existingAssistantByEmail = await Assistant.findOne({ where: { email } });
+    if (existingAssistantByEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Assistant already exists with this email'
+      });
+    }
+
+    // Create new assistant
+    const assistant = await Assistant.create({
+      name,
+      address,
+      phone_no,
+      email,
+      user_name,
+      password
+    });
+
+    // Generate token
+    const token = generateToken(assistant.id, 'assistant');
+
+    res.status(201).json({
+      success: true,
+      message: 'Assistant registered successfully',
+      data: {
+        assistant: {
+          id: assistant.id,
+          name: assistant.name,
+          user_name: assistant.user_name,
+          email: assistant.email,
+          phone_no: assistant.phone_no,
+          address: assistant.address
+        },
+        token
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error during assistant registration',
+      error: error.message
+    });
+  }
+};
+
+// Assistant Login
+const loginAssistant = async (req, res) => {
+  try {
+    const { user_name, password } = req.body;
+
+    // Find assistant by username
+    const assistant = await Assistant.findOne({ where: { user_name } });
+    if (!assistant) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Check password
+    const isPasswordValid = await assistant.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Check if assistant is active
+    if (!assistant.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is deactivated'
+      });
+    }
+
+    // Generate token
+    const token = generateToken(assistant.id, 'assistant');
+
+    res.status(200).json({
+      success: true,
+      message: 'Assistant login successful',
+      data: {
+        assistant: {
+          id: assistant.id,
+          name: assistant.name,
+          user_name: assistant.user_name,
+          email: assistant.email,
+          phone_no: assistant.phone_no,
+          address: assistant.address
+        },
+        token
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error during assistant login',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -373,5 +491,7 @@ module.exports = {
   getUserProfile,
   getAdminProfile,
   registerDriver,
-  loginDriver
+  loginDriver,
+  registerAssistant,
+  loginAssistant
 };

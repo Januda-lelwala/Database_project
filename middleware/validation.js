@@ -73,32 +73,6 @@ const validateAdminRegistration = [
   handleValidationErrors
 ];
 
-// Vehicle validation
-const validateVehicle = [
-  body('vehicleNumber')
-    .trim()
-    .notEmpty()
-    .withMessage('Vehicle number is required'),
-  body('type')
-    .isIn(['bus', 'taxi', 'auto', 'truck', 'van', 'car'])
-    .withMessage('Invalid vehicle type'),
-  body('brand')
-    .trim()
-    .notEmpty()
-    .withMessage('Vehicle brand is required'),
-  body('model')
-    .trim()
-    .notEmpty()
-    .withMessage('Vehicle model is required'),
-  body('capacity')
-    .isInt({ min: 1 })
-    .withMessage('Capacity must be a positive integer'),
-  body('fuelType')
-    .isIn(['petrol', 'diesel', 'cng', 'electric', 'hybrid'])
-    .withMessage('Invalid fuel type'),
-  handleValidationErrors
-];
-
 // Route validation
 const validateRoute = [
   body('routeName')
@@ -150,72 +124,108 @@ const validateBooking = [
 const validateStore = [
   body('name')
     .trim()
-    .isLength({ min: 2, max: 100 })
-    .withMessage('Store name must be between 2 and 100 characters'),
+    .isLength({ min: 2, max: 120 })
+    .withMessage('Store name must be between 2 and 120 characters'),
   body('city')
     .trim()
-    .notEmpty()
-    .withMessage('City is required'),
-  body('address')
-    .trim()
-    .isLength({ min: 5, max: 255 })
-    .withMessage('Address must be between 5 and 255 characters'),
-  body('contactNo')
-    .matches(/^[0-9]{10}$/)
-    .withMessage('Please provide a valid 10-digit contact number'),
-  body('email')
-    .optional()
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email'),
+    .isLength({ min: 2, max: 80 })
+    .withMessage('City must be between 2 and 80 characters'),
   handleValidationErrors
 ];
 
 // Truck validation
 const validateTruck = [
-  body('registrationNo')
+  body('license_plate')
     .trim()
     .notEmpty()
-    .withMessage('Registration number is required'),
+    .withMessage('License plate is required')
+    .isLength({ max: 40 })
+    .withMessage('License plate must not exceed 40 characters'),
   body('capacity')
-    .isFloat({ min: 0 })
-    .withMessage('Capacity must be a positive number'),
-  body('status')
-    .optional()
-    .isIn(['available', 'in_transit', 'maintenance', 'out_of_service'])
-    .withMessage('Invalid truck status'),
-  body('model')
+    .isFloat({ min: 0.0001 })
+    .withMessage('Capacity must be a positive number greater than 0'),
+  handleValidationErrors
+];
+
+// Train validation
+const validateTrain = [
+  body('capacity')
+    .isFloat({ min: 0.0001 })
+    .withMessage('Capacity must be a positive number greater than 0'),
+  body('notes')
     .optional()
     .trim()
-    .isLength({ max: 100 })
-    .withMessage('Model must not exceed 100 characters'),
-  body('year')
-    .optional()
-    .isInt({ min: 1900, max: new Date().getFullYear() + 1 })
-    .withMessage('Invalid year'),
+    .isLength({ max: 255 })
+    .withMessage('Notes must not exceed 255 characters'),
   handleValidationErrors
 ];
 
 // Order validation
 const validateOrder = [
-  body('customerId')
+  body('customer_id')
+    .trim()
     .notEmpty()
     .withMessage('Customer ID is required'),
-  body('storeId')
+  body('destination_city')
+    .trim()
     .notEmpty()
-    .withMessage('Store ID is required'),
-  body('deliveryAddress')
+    .withMessage('Destination city is required'),
+  body('destination_address')
     .trim()
     .isLength({ min: 5, max: 255 })
-    .withMessage('Delivery address must be between 5 and 255 characters'),
-  body('orderDate')
+    .withMessage('Destination address must be between 5 and 255 characters'),
+  body('order_date')
     .optional()
-    .isDate()
-    .withMessage('Invalid order date'),
+    .isISO8601()
+    .withMessage('Invalid order date format'),
+  body('items')
+    .optional()
+    .isArray()
+    .withMessage('Items must be an array'),
+  body('items.*.product_id')
+    .if(body('items').exists())
+    .notEmpty()
+    .withMessage('Product ID is required for each item'),
+  body('items.*.quantity')
+    .if(body('items').exists())
+    .isInt({ min: 1 })
+    .withMessage('Quantity must be at least 1'),
+  body('items.*.unit_price')
+    .if(body('items').exists())
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('Unit price must be a positive number'),
   body('status')
     .optional()
-    .isIn(['pending', 'processing', 'in_transit', 'delivered', 'cancelled'])
+    .isIn(['pending', 'confirmed', 'scheduled', 'in_transit', 'delivered', 'cancelled'])
     .withMessage('Invalid order status'),
+  handleValidationErrors
+];
+
+// Product validation
+const validateProduct = [
+  body('name')
+    .trim()
+    .isLength({ min: 2, max: 120 })
+    .withMessage('Product name must be between 2 and 120 characters'),
+  body('description')
+    .optional()
+    .trim(),
+  body('price')
+    .isFloat({ min: 0 })
+    .withMessage('Price must be a positive number'),
+  body('space_consumption')
+    .isFloat({ min: 0.0001 })
+    .withMessage('Space consumption must be greater than 0'),
+  body('category')
+    .optional()
+    .trim()
+    .isLength({ max: 60 })
+    .withMessage('Category must not exceed 60 characters'),
+  body('available_quantity')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Available quantity must be a non-negative integer'),
   handleValidationErrors
 ];
 
@@ -225,13 +235,21 @@ const validateCustomer = [
     .trim()
     .isLength({ min: 2, max: 100 })
     .withMessage('Name must be between 2 and 100 characters'),
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email'),
-  body('phone')
-    .matches(/^[0-9]{10}$/)
-    .withMessage('Please provide a valid 10-digit phone number'),
+  body('user_name')
+    .trim()
+    .isLength({ min: 3, max: 50 })
+    .withMessage('Username must be between 3 and 50 characters'),
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters'),
+  body('phone_no')
+    .optional()
+    .trim(),
+  body('city')
+    .optional()
+    .trim()
+    .isLength({ max: 80 })
+    .withMessage('City must not exceed 80 characters'),
   body('address')
     .optional()
     .trim()
@@ -279,17 +297,59 @@ const validateDriverLogin = [
   handleValidationErrors
 ];
 
+// Assistant registration validation
+const validateAssistantRegistration = [
+  body('name')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Name must be between 2 and 50 characters'),
+  body('user_name')
+    .trim()
+    .isLength({ min: 3, max: 50 })
+    .withMessage('Username must be between 3 and 50 characters'),
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email'),
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long'),
+  body('phone_no')
+    .trim()
+    .notEmpty()
+    .withMessage('Phone number is required'),
+  body('address')
+    .optional()
+    .trim(),
+  handleValidationErrors
+];
+
+// Assistant login validation
+const validateAssistantLogin = [
+  body('user_name')
+    .trim()
+    .notEmpty()
+    .withMessage('Please provide a username'),
+  body('password')
+    .notEmpty()
+    .withMessage('Password is required'),
+  handleValidationErrors
+];
+
 module.exports = {
   validateUserRegistration,
   validateUserLogin,
   validateAdminRegistration,
-  validateVehicle,
   validateRoute,
   validateBooking,
   validateStore,
   validateTruck,
+  validateTrain,
   validateOrder,
+  validateProduct,
   validateCustomer,
   validateDriverRegistration,
-  validateDriverLogin
+  validateDriverLogin,
+  validateAssistantRegistration,
+  validateAssistantLogin
 };

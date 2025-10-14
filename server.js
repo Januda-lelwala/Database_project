@@ -16,6 +16,7 @@ const productRoutes = require('./routes/productRoutes');
 // Store and truck routes
 const storeRoutes = require('./routes/storeRoutes');
 const truckRoutes = require('./routes/truckRoutes');
+const trainRoutes = require('./routes/trainRoutes');
 
 // Initialize express app
 const app = express();
@@ -57,6 +58,7 @@ app.use('/api/products', productRoutes);
 // Store and truck routes
 app.use('/api/stores', storeRoutes);
 app.use('/api/trucks', truckRoutes);
+app.use('/api/trains', trainRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -79,7 +81,8 @@ app.get('/', (req, res) => {
       orders: '/api/orders',
       products: '/api/products',
       stores: '/api/stores',
-      trucks: '/api/trucks'
+      trucks: '/api/trucks',
+      trains: '/api/trains'
     },
     documentation: '/api/docs'
   });
