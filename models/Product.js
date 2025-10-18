@@ -42,6 +42,11 @@ module.exports = (sequelize) => {
       validate: {
         min: { args: [0], msg: 'Available quantity must be greater than or equal to 0' }
       }
+    },
+    image_url: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      defaultValue: null
     }
   }, {
     timestamps: false,
@@ -55,6 +60,9 @@ module.exports = (sequelize) => {
       foreignKey: 'product_id',
       as: 'orderItems'
     });
+    
+    // Prevent Category association from adding categoryId foreign key
+    // Product uses string category field, not foreign key
   };
 
   return Product;

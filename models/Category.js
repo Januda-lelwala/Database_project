@@ -63,10 +63,11 @@ module.exports = (sequelize) => {
 
   // Define associations
   Category.associate = (models) => {
-    Category.hasMany(models.Product, {
-      foreignKey: 'categoryId',
-      as: 'products'
-    });
+    // Removed Product association - Product uses string category field, not foreign key
+    // Category.hasMany(models.Product, {
+    //   foreignKey: 'categoryId',
+    //   as: 'products'
+    // });
     
     Category.belongsTo(models.Category, {
       foreignKey: 'parentId',
