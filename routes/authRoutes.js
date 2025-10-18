@@ -17,6 +17,7 @@ const {
   validateUserRegistration, 
   validateUserLogin, 
   validateAdminRegistration,
+  validateAdminLogin,
   validateDriverRegistration,
   validateDriverLogin,
   validateAssistantRegistration,
@@ -30,7 +31,7 @@ router.get('/profile', verifyUser, getUserProfile);
 
 // Admin routes
 router.post('/admin/register', validateAdminRegistration, verifyAdmin, registerAdmin);
-router.post('/admin/login', validateUserLogin, loginAdmin);
+router.post('/admin/login', validateAdminLogin, loginAdmin);
 router.get('/admin/profile', verifyAdmin, getAdminProfile);
 
 // Driver routes

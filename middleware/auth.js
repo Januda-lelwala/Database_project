@@ -72,10 +72,10 @@ const verifyAdmin = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const admin = await Admin.findByPk(decoded.id);
     
-    if (!admin || !admin.isActive) {
+    if (!admin) {
       return res.status(401).json({
         success: false,
-        message: 'Admin not found or inactive.'
+        message: 'Admin not found.'
       });
     }
 

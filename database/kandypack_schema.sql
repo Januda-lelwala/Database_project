@@ -601,7 +601,7 @@ VALUES
 
 INSERT INTO truck (truck_id, license_plate, capacity) VALUES
 ('TK01', 'WP-1234', 60.0),
-('TK02', 'WP-5678', 60.0);
+('TK03', 'WP-5678', 60.0);
 
 INSERT INTO driver (driver_id, name, phone_no) VALUES
 ('DRV001','John Driver','+94770000001'),

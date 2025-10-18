@@ -114,36 +114,39 @@ const loginUser = async (req, res) => {
 // Admin Registration
 const registerAdmin = async (req, res) => {
   try {
-    const { name, email, password, phone, role, permissions } = req.body;
+    const { name, password } = req.body;
+
+    // Generate admin ID
+    const adminCount = await Admin.count();
+    const admin_id = `ADM${String(adminCount + 1).padStart(3, '0')}`;
 
     // Check if admin already exists
-    const existingAdmin = await Admin.findOne({ where: { email } });
+    const existingAdmin = await Admin.findOne({ where: { admin_id } });
     if (existingAdmin) {
       return res.status(400).json({
         success: false,
-        message: 'Admin already exists with this email'
+        message: 'Admin already exists with this ID'
       });
     }
 
     // Create new admin
     const admin = await Admin.create({
+      admin_id,
       name,
-      email,
-      password,
-      phone,
-      role: role || 'admin',
-      permissions: permissions || ['manage_bookings', 'view_reports'],
-      createdById: req.admin ? req.admin.id : null
+      password
     });
 
     // Generate token
-    const token = generateToken(admin.id, admin.role);
+    const token = generateToken(admin.admin_id, 'admin');
 
     res.status(201).json({
       success: true,
       message: 'Admin registered successfully',
       data: {
-        admin,
+        admin: {
+          admin_id: admin.admin_id,
+          name: admin.name
+        },
         token
       }
     });
@@ -159,22 +162,14 @@ const registerAdmin = async (req, res) => {
 // Admin Login
 const loginAdmin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { admin_id, password } = req.body;
 
-    // Find admin by email
-    const admin = await Admin.findOne({ where: { email } });
+    // Find admin by admin_id
+    const admin = await Admin.findOne({ where: { admin_id } });
     if (!admin) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
-      });
-    }
-
-    // Check if admin is active
-    if (!admin.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Account is deactivated'
       });
     }
 
@@ -187,18 +182,17 @@ const loginAdmin = async (req, res) => {
       });
     }
 
-    // Update last login
-    admin.lastLogin = new Date();
-    await admin.save();
-
     // Generate token
-    const token = generateToken(admin.id, admin.role);
+    const token = generateToken(admin.admin_id, 'admin');
 
     res.status(200).json({
       success: true,
       message: 'Admin login successful',
       data: {
-        admin,
+        admin: {
+          admin_id: admin.admin_id,
+          name: admin.name
+        },
         token
       }
     });

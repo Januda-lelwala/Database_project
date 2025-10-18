@@ -17,6 +17,11 @@ const productRoutes = require('./routes/productRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const truckRoutes = require('./routes/truckRoutes');
 const trainRoutes = require('./routes/trainRoutes');
+// Driver and assistant routes
+const driverRoutes = require('./routes/driverRoutes');
+const assistantRoutes = require('./routes/assistantRoutes');
+// Admin management routes
+const adminRoutes = require('./routes/adminRoutes');
 
 // Initialize express app
 const app = express();
@@ -42,7 +47,14 @@ app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Enable CORS
-app.use(cors());
+const corsOptions = {
+  origin: ['http://localhost:3002', 'http://127.0.0.1:3002'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Authorization']
+};
+app.use(cors(corsOptions));
 
 // Development logging
 if (process.env.NODE_ENV === 'development') {
@@ -59,6 +71,11 @@ app.use('/api/products', productRoutes);
 app.use('/api/stores', storeRoutes);
 app.use('/api/trucks', truckRoutes);
 app.use('/api/trains', trainRoutes);
+// Driver and assistant routes
+app.use('/api/drivers', driverRoutes);
+app.use('/api/assistants', assistantRoutes);
+// Admin management routes
+app.use('/api/admins', adminRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -82,7 +99,10 @@ app.get('/', (req, res) => {
       products: '/api/products',
       stores: '/api/stores',
       trucks: '/api/trucks',
-      trains: '/api/trains'
+      trains: '/api/trains',
+      drivers: '/api/drivers',
+      assistants: '/api/assistants',
+      admins: '/api/admins'
     },
     documentation: '/api/docs'
   });

@@ -28,9 +28,10 @@ module.exports = (sequelize) => {
 
   // Define associations
   Store.associate = (models) => {
-    // A store can have many train trips
-    // A store can have many truck routes
-    // These associations can be added when those models exist
+    Store.hasMany(models.TruckRoute, {
+      foreignKey: 'store_id',
+      as: 'truckRoutes'
+    });
   };
 
   return Store;

@@ -4,6 +4,10 @@ const { body, validationResult } = require('express-validator');
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('=== VALIDATION ERROR ===');
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    console.log('Errors:', JSON.stringify(errors.array(), null, 2));
+    console.log('=======================');
     return res.status(400).json({
       success: false,
       message: 'Validation failed',
@@ -54,22 +58,11 @@ const validateUserLogin = [
 const validateAdminRegistration = [
   body('name')
     .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be between 2 and 50 characters'),
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email'),
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Name must be between 2 and 100 characters'),
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
-  body('phone')
-    .matches(/^[0-9]{10}$/)
-    .withMessage('Please provide a valid 10-digit phone number'),
-  body('role')
-    .optional()
-    .isIn(['admin', 'super_admin'])
-    .withMessage('Invalid role'),
   handleValidationErrors
 ];
 
@@ -336,6 +329,18 @@ const validateAssistantLogin = [
   handleValidationErrors
 ];
 
+// Admin login validation
+const validateAdminLogin = [
+  body('admin_id')
+    .trim()
+    .notEmpty()
+    .withMessage('Please provide an admin ID'),
+  body('password')
+    .notEmpty()
+    .withMessage('Password is required'),
+  handleValidationErrors
+];
+
 module.exports = {
   validateUserRegistration,
   validateUserLogin,
@@ -351,5 +356,6 @@ module.exports = {
   validateDriverRegistration,
   validateDriverLogin,
   validateAssistantRegistration,
-  validateAssistantLogin
+  validateAssistantLogin,
+  validateAdminLogin
 };
