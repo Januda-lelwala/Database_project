@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { verifyAdmin, verifyUser } = require('../middleware/auth');
+const { verifyAdmin, verifyUser, verifyUserOrAdmin } = require('../middleware/auth');
 const { validateOrder } = require('../middleware/validation');
 const orderController = require('../controllers/orderController');
 
 // Order routes
-router.get('/', verifyAdmin, orderController.getAllOrders);
+router.get('/', verifyUserOrAdmin, orderController.getAllOrders);
 router.get('/:id', verifyUser, orderController.getOrderById);
 router.post('/', verifyUser, validateOrder, orderController.createOrder);
 router.put('/:id', verifyUser, validateOrder, orderController.updateOrder);

@@ -155,10 +155,6 @@ const validateTrain = [
 
 // Order validation
 const validateOrder = [
-  body('customer_id')
-    .trim()
-    .notEmpty()
-    .withMessage('Customer ID is required'),
   body('destination_city')
     .trim()
     .notEmpty()
@@ -171,20 +167,16 @@ const validateOrder = [
     .optional()
     .isISO8601()
     .withMessage('Invalid order date format'),
-  body('items')
-    .optional()
-    .isArray()
-    .withMessage('Items must be an array'),
-  body('items.*.product_id')
-    .if(body('items').exists())
+  body('order_items')
+    .isArray({ min: 1 })
+    .withMessage('Order must contain at least one item'),
+  body('order_items.*.product_id')
     .notEmpty()
     .withMessage('Product ID is required for each item'),
-  body('items.*.quantity')
-    .if(body('items').exists())
+  body('order_items.*.quantity')
     .isInt({ min: 1 })
     .withMessage('Quantity must be at least 1'),
-  body('items.*.unit_price')
-    .if(body('items').exists())
+  body('order_items.*.unit_price')
     .optional()
     .isFloat({ min: 0 })
     .withMessage('Unit price must be a positive number'),
@@ -261,17 +253,17 @@ const validateDriverRegistration = [
     .trim()
     .isLength({ min: 3, max: 50 })
     .withMessage('Username must be between 3 and 50 characters'),
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email'),
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
-  body('phone_no')
-    .trim()
-    .notEmpty()
-    .withMessage('Phone number is required'),
+  body('email')
+    .optional()
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email'),
+  body('phone')
+    .optional()
+    .trim(),
   body('address')
     .optional()
     .trim(),
@@ -280,10 +272,10 @@ const validateDriverRegistration = [
 
 // Driver login validation
 const validateDriverLogin = [
-  body('user_name')
+  body('driver_id')
     .trim()
     .notEmpty()
-    .withMessage('Please provide a username'),
+    .withMessage('Please provide a driver ID'),
   body('password')
     .notEmpty()
     .withMessage('Password is required'),
@@ -300,17 +292,17 @@ const validateAssistantRegistration = [
     .trim()
     .isLength({ min: 3, max: 50 })
     .withMessage('Username must be between 3 and 50 characters'),
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email'),
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
-  body('phone_no')
-    .trim()
-    .notEmpty()
-    .withMessage('Phone number is required'),
+  body('email')
+    .optional()
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email'),
+  body('phone')
+    .optional()
+    .trim(),
   body('address')
     .optional()
     .trim(),
@@ -319,10 +311,10 @@ const validateAssistantRegistration = [
 
 // Assistant login validation
 const validateAssistantLogin = [
-  body('user_name')
+  body('assistant_id')
     .trim()
     .notEmpty()
-    .withMessage('Please provide a username'),
+    .withMessage('Please provide an assistant ID'),
   body('password')
     .notEmpty()
     .withMessage('Password is required'),

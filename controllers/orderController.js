@@ -13,10 +13,19 @@ const generateOrderItemId = async () => {
   return `OI${String(itemCount + 1).padStart(4, '0')}`;
 };
 
-// Get all orders
+// Get all orders (admin gets all, customer gets their own)
 const getAllOrders = async (req, res) => {
   try {
+    // Build where clause based on user role
+    const whereClause = {};
+    if (req.user && req.user.role === 'customer') {
+      // Customer can only see their own orders
+      whereClause.customer_id = req.user.id;
+    }
+    // Admin can see all orders (no where clause)
+
     const orders = await Order.findAll({
+      where: whereClause,
       include: [
         {
           model: Customer,
@@ -100,7 +109,10 @@ const getOrderById = async (req, res) => {
 // Create new order
 const createOrder = async (req, res) => {
   try {
-    const { customer_id, order_date, destination_city, destination_address, items } = req.body;
+    const { order_date, destination_city, destination_address, order_items } = req.body;
+
+    // Get customer_id from authenticated user
+    const customer_id = req.user.customer_id;
 
     // Verify customer exists
     const customer = await Customer.findByPk(customer_id);
@@ -125,8 +137,8 @@ const createOrder = async (req, res) => {
     });
 
     // Create order items if provided
-    if (items && items.length > 0) {
-      for (const item of items) {
+    if (order_items && order_items.length > 0) {
+      for (const item of order_items) {
         // Verify product exists
         const product = await Product.findByPk(item.product_id);
         if (!product) {

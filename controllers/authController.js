@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const db = require('../models');
 const { Customer, Admin, Driver, Assistant } = db;
 
@@ -244,7 +245,7 @@ const getAdminProfile = async (req, res) => {
 // Driver Registration
 const registerDriver = async (req, res) => {
   try {
-    const { name, address, phone_no, email, user_name, password } = req.body;
+    const { name, address, phone, email, driver_id, user_name, password } = req.body;
 
     // Check if driver already exists by username
     const existingDriverByUsername = await Driver.findOne({ where: { user_name } });
@@ -255,34 +256,52 @@ const registerDriver = async (req, res) => {
       });
     }
 
-    // Check if driver already exists by email
-    const existingDriverByEmail = await Driver.findOne({ where: { email } });
-    if (existingDriverByEmail) {
-      return res.status(400).json({
-        success: false,
-        message: 'Driver already exists with this email'
-      });
+    // Check if driver already exists by email (if provided)
+    if (email) {
+      const existingDriverByEmail = await Driver.findOne({ where: { email } });
+      if (existingDriverByEmail) {
+        return res.status(400).json({
+          success: false,
+          message: 'Driver already exists with this email'
+        });
+      }
     }
+
+    // Check if driver_id already exists (if provided)
+    if (driver_id) {
+      const existingDriver = await Driver.findByPk(driver_id);
+      if (existingDriver) {
+        return res.status(400).json({
+          success: false,
+          message: 'Driver ID already exists'
+        });
+      }
+    }
+
+    // Generate driver ID if not provided
+    const driverCount = await Driver.count();
+    const newDriverId = driver_id || `DRV${String(driverCount + 1).padStart(3, '0')}`;
 
     // Create new driver
     const driver = await Driver.create({
+      driver_id: newDriverId,
       name,
-      address,
-      phone_no,
-      email,
+      address: address || null,
+      phone_no: phone || null,
+      email: email || null,
       user_name,
       password
     });
 
     // Generate token
-    const token = generateToken(driver.id, 'driver');
+    const token = generateToken(driver.driver_id, 'driver');
 
     res.status(201).json({
       success: true,
       message: 'Driver registered successfully',
       data: {
         driver: {
-          id: driver.id,
+          driver_id: driver.driver_id,
           name: driver.name,
           user_name: driver.user_name,
           email: driver.email,
@@ -304,10 +323,18 @@ const registerDriver = async (req, res) => {
 // Driver Login
 const loginDriver = async (req, res) => {
   try {
-    const { user_name, password } = req.body;
+    const { driver_id, password } = req.body;
 
-    // Find driver by username
-    const driver = await Driver.findOne({ where: { user_name } });
+    // Find driver by driver_id or user_name
+    const driver = await Driver.findOne({ 
+      where: { 
+        [Op.or]: [
+          { driver_id: driver_id },
+          { user_name: driver_id }
+        ]
+      } 
+    });
+    
     if (!driver) {
       return res.status(401).json({
         success: false,
@@ -324,23 +351,15 @@ const loginDriver = async (req, res) => {
       });
     }
 
-    // Check if driver is active
-    if (!driver.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Account is deactivated'
-      });
-    }
-
     // Generate token
-    const token = generateToken(driver.id, 'driver');
+    const token = generateToken(driver.driver_id, 'driver');
 
     res.status(200).json({
       success: true,
       message: 'Driver login successful',
       data: {
         driver: {
-          id: driver.id,
+          driver_id: driver.driver_id,
           name: driver.name,
           user_name: driver.user_name,
           email: driver.email,
@@ -362,7 +381,7 @@ const loginDriver = async (req, res) => {
 // Assistant Registration
 const registerAssistant = async (req, res) => {
   try {
-    const { name, address, phone_no, email, user_name, password } = req.body;
+    const { name, address, phone, email, assistant_id, user_name, password } = req.body;
 
     // Check if assistant already exists by username
     const existingAssistantByUsername = await Assistant.findOne({ where: { user_name } });
@@ -373,34 +392,52 @@ const registerAssistant = async (req, res) => {
       });
     }
 
-    // Check if assistant already exists by email
-    const existingAssistantByEmail = await Assistant.findOne({ where: { email } });
-    if (existingAssistantByEmail) {
-      return res.status(400).json({
-        success: false,
-        message: 'Assistant already exists with this email'
-      });
+    // Check if assistant already exists by email (if provided)
+    if (email) {
+      const existingAssistantByEmail = await Assistant.findOne({ where: { email } });
+      if (existingAssistantByEmail) {
+        return res.status(400).json({
+          success: false,
+          message: 'Assistant already exists with this email'
+        });
+      }
     }
+
+    // Check if assistant_id already exists (if provided)
+    if (assistant_id) {
+      const existingAssistant = await Assistant.findByPk(assistant_id);
+      if (existingAssistant) {
+        return res.status(400).json({
+          success: false,
+          message: 'Assistant ID already exists'
+        });
+      }
+    }
+
+    // Generate assistant ID if not provided
+    const assistantCount = await Assistant.count();
+    const newAssistantId = assistant_id || `AST${String(assistantCount + 1).padStart(3, '0')}`;
 
     // Create new assistant
     const assistant = await Assistant.create({
+      assistant_id: newAssistantId,
       name,
-      address,
-      phone_no,
-      email,
+      address: address || null,
+      phone_no: phone || null,
+      email: email || null,
       user_name,
       password
     });
 
     // Generate token
-    const token = generateToken(assistant.id, 'assistant');
+    const token = generateToken(assistant.assistant_id, 'assistant');
 
     res.status(201).json({
       success: true,
       message: 'Assistant registered successfully',
       data: {
         assistant: {
-          id: assistant.id,
+          assistant_id: assistant.assistant_id,
           name: assistant.name,
           user_name: assistant.user_name,
           email: assistant.email,
@@ -422,10 +459,18 @@ const registerAssistant = async (req, res) => {
 // Assistant Login
 const loginAssistant = async (req, res) => {
   try {
-    const { user_name, password } = req.body;
+    const { assistant_id, password } = req.body;
 
-    // Find assistant by username
-    const assistant = await Assistant.findOne({ where: { user_name } });
+    // Find assistant by assistant_id or user_name
+    const assistant = await Assistant.findOne({ 
+      where: { 
+        [Op.or]: [
+          { assistant_id: assistant_id },
+          { user_name: assistant_id }
+        ]
+      } 
+    });
+    
     if (!assistant) {
       return res.status(401).json({
         success: false,
@@ -442,23 +487,15 @@ const loginAssistant = async (req, res) => {
       });
     }
 
-    // Check if assistant is active
-    if (!assistant.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Account is deactivated'
-      });
-    }
-
     // Generate token
-    const token = generateToken(assistant.id, 'assistant');
+    const token = generateToken(assistant.assistant_id, 'assistant');
 
     res.status(200).json({
       success: true,
       message: 'Assistant login successful',
       data: {
         assistant: {
-          id: assistant.id,
+          assistant_id: assistant.assistant_id,
           name: assistant.name,
           user_name: assistant.user_name,
           email: assistant.email,

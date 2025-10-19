@@ -35,11 +35,11 @@ router.post('/admin/login', validateAdminLogin, loginAdmin);
 router.get('/admin/profile', verifyAdmin, getAdminProfile);
 
 // Driver routes
-router.post('/driver/register', validateDriverRegistration, registerDriver);
+router.post('/driver/register', verifyAdmin, validateDriverRegistration, registerDriver);
 router.post('/driver/login', validateDriverLogin, loginDriver);
 
 // Assistant routes
-router.post('/assistant/register', validateAssistantRegistration, registerAssistant);
+router.post('/assistant/register', verifyAdmin, validateAssistantRegistration, registerAssistant);
 router.post('/assistant/login', validateAssistantLogin, loginAssistant);
 
 module.exports = router;

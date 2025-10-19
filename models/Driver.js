@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize');
+const bcrypt = require('bcryptjs');
 
 module.exports = (sequelize) => {
   const Driver = sequelize.define('Driver', {
@@ -25,12 +26,44 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(120),
       allowNull: true,
       unique: true
+    },
+    user_name: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      unique: true,
+      validate: {
+        notEmpty: { msg: 'Username is required' }
+      }
+    },
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      validate: {
+        notEmpty: { msg: 'Password is required' }
+      }
     }
   }, {
     timestamps: false,
     underscored: true,
-    tableName: 'driver'
+    tableName: 'driver',
+    hooks: {
+      beforeCreate: async (driver) => {
+        if (driver.password) {
+          driver.password = await bcrypt.hash(driver.password, 12);
+        }
+      },
+      beforeUpdate: async (driver) => {
+        if (driver.changed('password')) {
+          driver.password = await bcrypt.hash(driver.password, 12);
+        }
+      }
+    }
   });
+
+  // Instance method to compare password
+  Driver.prototype.comparePassword = async function(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+  };
 
   // Define associations
   Driver.associate = (models) => {

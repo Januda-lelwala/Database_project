@@ -42,11 +42,6 @@ module.exports = (sequelize) => {
       validate: {
         min: { args: [0], msg: 'Available quantity must be greater than or equal to 0' }
       }
-    },
-    image_url: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-      defaultValue: null
     }
   }, {
     timestamps: false,

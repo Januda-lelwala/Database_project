@@ -22,6 +22,8 @@ const driverRoutes = require('./routes/driverRoutes');
 const assistantRoutes = require('./routes/assistantRoutes');
 // Admin management routes
 const adminRoutes = require('./routes/adminRoutes');
+// Truck route management
+const truckRouteRoutes = require('./routes/truckRouteRoutes');
 
 // Initialize express app
 const app = express();
@@ -32,13 +34,17 @@ connectDB();
 // Set security HTTP headers
 app.use(helmet());
 
-// Rate limiting
+// Rate limiting - more lenient in development
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // Higher limit in development
   standardHeaders: true,
   legacyHeaders: false,
-  message: 'Too many requests from this IP, please try again after 15 minutes'
+  message: 'Too many requests from this IP, please try again after 15 minutes',
+  skip: (req) => {
+    // Skip rate limiting for health check
+    return req.path === '/health' || req.path === '/';
+  }
 });
 app.use('/api', limiter);
 
@@ -76,6 +82,8 @@ app.use('/api/drivers', driverRoutes);
 app.use('/api/assistants', assistantRoutes);
 // Admin management routes
 app.use('/api/admins', adminRoutes);
+// Truck route management
+app.use('/api/truck-routes', truckRouteRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -102,7 +110,8 @@ app.get('/', (req, res) => {
       trains: '/api/trains',
       drivers: '/api/drivers',
       assistants: '/api/assistants',
-      admins: '/api/admins'
+      admins: '/api/admins',
+      truckRoutes: '/api/truck-routes'
     },
     documentation: '/api/docs'
   });
