@@ -161,10 +161,59 @@ const checkPermission = (permission) => {
   };
 };
 
+// Middleware to verify driver authentication
+const verifyDriver = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access denied. No token provided.'
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Check if it's a driver
+    if (decoded.role !== 'driver') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Driver authentication required.'
+      });
+    }
+
+    const { Driver } = require('../models');
+    const driver = await Driver.findByPk(decoded.id);
+    
+    if (!driver) {
+      return res.status(401).json({
+        success: false,
+        message: 'Driver not found.'
+      });
+    }
+
+    req.user = { 
+      driver_id: driver.driver_id, 
+      id: driver.driver_id,
+      role: 'driver',
+      name: driver.name
+    };
+    req.driver = driver;
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid token.'
+    });
+  }
+};
+
 module.exports = {
   verifyToken,
   verifyUser,
   verifyAdmin,
   verifyUserOrAdmin,
+  verifyDriver,
   checkPermission
 };

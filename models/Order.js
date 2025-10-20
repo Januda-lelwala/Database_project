@@ -30,6 +30,18 @@ module.exports = (sequelize) => {
       type: DataTypes.ENUM('pending', 'confirmed', 'scheduled', 'in_transit', 'delivered', 'cancelled'),
       defaultValue: 'pending'
     },
+    driver_id: {
+      type: DataTypes.STRING(40),
+      allowNull: true,
+      references: {
+        model: 'driver',
+        key: 'driver_id'
+      }
+    },
+    payment_method: {
+      type: DataTypes.ENUM('Cash', 'Card'),
+      defaultValue: 'Cash'
+    },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -51,6 +63,11 @@ module.exports = (sequelize) => {
     Order.belongsTo(models.Customer, {
       foreignKey: 'customer_id',
       as: 'customer'
+    });
+    
+    Order.belongsTo(models.Driver, {
+      foreignKey: 'driver_id',
+      as: 'driver'
     });
     
     Order.hasMany(models.OrderItem, {

@@ -20,10 +20,14 @@ const trainRoutes = require('./routes/trainRoutes');
 // Driver and assistant routes
 const driverRoutes = require('./routes/driverRoutes');
 const assistantRoutes = require('./routes/assistantRoutes');
+// Driver portal routes
+const driverPortalRoutes = require('./routes/driverPortalRoutes');
 // Admin management routes
 const adminRoutes = require('./routes/adminRoutes');
 // Truck route management
 const truckRouteRoutes = require('./routes/truckRouteRoutes');
+// Truck schedule management
+const truckScheduleRoutes = require('./routes/truckScheduleRoutes');
 
 // Initialize express app
 const app = express();
@@ -80,10 +84,14 @@ app.use('/api/trains', trainRoutes);
 // Driver and assistant routes
 app.use('/api/drivers', driverRoutes);
 app.use('/api/assistants', assistantRoutes);
+// Driver portal routes
+app.use('/api/portal/driver', driverPortalRoutes);
 // Admin management routes
 app.use('/api/admins', adminRoutes);
 // Truck route management
 app.use('/api/truck-routes', truckRouteRoutes);
+// Truck schedule management
+app.use('/api/truck-schedule', truckScheduleRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -110,8 +118,10 @@ app.get('/', (req, res) => {
       trains: '/api/trains',
       drivers: '/api/drivers',
       assistants: '/api/assistants',
+      driverPortal: '/api/portal/driver',
       admins: '/api/admins',
-      truckRoutes: '/api/truck-routes'
+      truckRoutes: '/api/truck-routes',
+      truckSchedule: '/api/truck-schedule'
     },
     documentation: '/api/docs'
   });

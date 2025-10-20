@@ -351,3 +351,17 @@ module.exports = {
   validateAssistantLogin,
   validateAdminLogin
 };
+
+// Driver assignment status update validation
+const validateScheduleStatusUpdate = [
+  body('assignmentId')
+    .trim()
+    .notEmpty()
+    .withMessage('Assignment ID is required'),
+  body('status')
+    .isIn(['pending', 'in-progress', 'completed'])
+    .withMessage('Status must be one of: pending, in-progress, completed'),
+  handleValidationErrors
+];
+
+module.exports.validateScheduleStatusUpdate = validateScheduleStatusUpdate;
